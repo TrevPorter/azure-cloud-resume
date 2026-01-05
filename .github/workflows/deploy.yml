@@ -43,7 +43,7 @@ jobs:
     - name: Upload site to Azure Storage
       run: |
         az storage blob upload-batch \
-          --account-name tfcloudresume1 \
+          --account-name tfcloudresume \
           --destination '$web' \
           --source site \
           --overwrite
