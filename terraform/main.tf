@@ -25,9 +25,10 @@ resource "azurerm_cdn_frontdoor_profile" "this" {
 }
 
 resource "azurerm_cdn_frontdoor_endpoint" "this" {
-  name                     = "cloud-resume-endpoint"
+  name                     = "cloud-resume-${random_string.suffix.result}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
 }
+
 
 resource "azurerm_cdn_frontdoor_origin_group" "this" {
   name                     = "storage-origin-group"
@@ -62,3 +63,8 @@ resource "azurerm_cdn_frontdoor_route" "this" {
   https_redirect_enabled = true
 }
 
+resource "random_string" "suffix" {
+  length  = 6
+  upper   = false
+  special = false
+}
