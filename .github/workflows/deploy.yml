@@ -35,7 +35,9 @@ jobs:
 
     - name: Terraform Apply
       working-directory: terraform
-      run: terraform apply -auto-approve
+      run: |
+        terraform apply -auto-approve \
+          -var="storage_account_name=tfcloudresume" \
 
     # ---------- SITE UPLOAD ----------
     - name: Upload site to Azure Storage
