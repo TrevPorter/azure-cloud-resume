@@ -43,7 +43,7 @@ jobs:
     - name: Upload site to Azure Storage
       run: |
         az storage blob upload-batch \
-          --account-name tfcloudresume \
+          --account-name tfcloudresume1 \
           --destination '$web' \
           --source site \
           --overwrite
@@ -52,6 +52,6 @@ jobs:
     - name: Purge Azure Front Door cache
       run: |
         az afd endpoint purge \
-          --resource-group tp-cloud-resume \
+          --resource-group tp-cloud-resume1 \
           --endpoint-name cloud-resume-endpoint \
           --content-paths "/*"
