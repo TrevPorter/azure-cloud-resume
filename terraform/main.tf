@@ -1,0 +1,64 @@
+resource "azurerm_resource_group" "this" {
+  name     = var.resource_group_name
+  location = var.location
+}
+
+resource "azurerm_storage_account" "this" {
+  name                     = var.storage_account_name
+  resource_group_name      = azurerm_resource_group.this.name
+  location                 = azurerm_resource_group.this.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+
+  static_website {
+    index_document     = "index.html"
+    error_404_document = "404.html"
+  }
+
+  allow_nested_items_to_be_public = true
+}
+
+resource "azurerm_cdn_frontdoor_profile" "this" {
+  name                = "fd-cloud-resume"
+  resource_group_name = azurerm_resource_group.this.name
+  sku_name            = "Standard_AzureFrontDoor"
+}
+
+resource "azurerm_cdn_frontdoor_endpoint" "this" {
+  name                     = "cloud-resume-endpoint"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
+}
+
+resource "azurerm_cdn_frontdoor_origin_group" "this" {
+  name                     = "storage-origin-group"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
+
+  load_balancing {
+    successful_samples_required = 1
+  }
+}
+
+resource "azurerm_cdn_frontdoor_origin" "this" {
+  name                          = "storage-origin"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.this.id
+
+  host_name                      = azurerm_storage_account.this.primary_web_host
+  origin_host_header             = azurerm_storage_account.this.primary_web_host
+  http_port                      = 80
+  https_port                     = 443
+  certificate_name_check_enabled = true
+  enabled                        = true
+}
+
+resource "azurerm_cdn_frontdoor_route" "this" {
+  name                          = "default-route"
+  cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.this.id
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.this.id
+  cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.this.id]
+
+  patterns_to_match      = ["/*"]
+  supported_protocols    = ["Http", "Https"]
+  forwarding_protocol    = "HttpsOnly"
+  https_redirect_enabled = true
+}
+
