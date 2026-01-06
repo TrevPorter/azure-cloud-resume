@@ -61,7 +61,7 @@ resource "azurerm_cdn_frontdoor_route" "this" {
   patterns_to_match      = ["/*"]
   supported_protocols    = ["Https"]
   forwarding_protocol    = "HttpsOnly"
-  https_redirect_enabled = true
+  https_redirect_enabled = false
 
   cdn_frontdoor_custom_domain_ids = [
     azurerm_cdn_frontdoor_custom_domain.resume.id
