@@ -59,13 +59,30 @@ resource "azurerm_cdn_frontdoor_route" "this" {
   cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.this.id]
 
   patterns_to_match      = ["/*"]
-  supported_protocols    = ["Http", "Https"]
+  supported_protocols    = ["http","Https"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
+
+  cdn_frontdoor_custom_domain_ids = [
+    azurerm_cdn_frontdoor_custom_domain.resume.id
+  ]
 }
+
 
 resource "random_string" "suffix" {
   length  = 6
   upper   = false
   special = false
 }
+
+resource "azurerm_cdn_frontdoor_custom_domain" "resume" {
+  name                     = "resume-domain"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
+  host_name                = "www.tporter.dev"
+
+  tls {
+    certificate_type    = "ManagedCertificate"
+    minimum_tls_version = "TLS12"
+  }
+}
+
