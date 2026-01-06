@@ -59,7 +59,7 @@ resource "azurerm_cdn_frontdoor_route" "this" {
   cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.this.id]
 
   patterns_to_match      = ["/*"]
-  supported_protocols    = ["http","Https"]
+  supported_protocols    = ["Https"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
 
