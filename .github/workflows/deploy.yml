@@ -46,8 +46,7 @@ jobs:
     - name: Terraform Apply
       if: steps.changes.outputs.terraform == 'true'
       working-directory: terraform
-      run: terraform apply -auto-approve \
-        -var="storage_account_name=tfcloudresume"
+      run: terraform apply -auto-approve -var="storage_account_name=tfcloudresume"
 
 
     # ---------- SITE ----------
