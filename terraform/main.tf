@@ -58,15 +58,15 @@ resource "azurerm_cdn_frontdoor_route" "this" {
   cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.this.id
   cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.this.id]
 
-  patterns_to_match      = ["/*"]
-  supported_protocols    = ["Https"]
-  forwarding_protocol    = "HttpsOnly"
+  patterns_to_match   = ["/*"]
+  supported_protocols = ["Https"]
+  forwarding_protocol = "HttpsOnly"
+
   https_redirect_enabled = false
 
-  cdn_frontdoor_custom_domain_ids = [
-    azurerm_cdn_frontdoor_custom_domain.resume.id
-  ]
+  cdn_frontdoor_custom_domain_ids = []
 }
+
 
 
 resource "random_string" "suffix" {
@@ -86,3 +86,132 @@ resource "azurerm_cdn_frontdoor_custom_domain" "resume" {
   }
 }
 
+
+resource "azurerm_function_app_flex_consumption" "this" {
+  name                = "func-cloud-resume"
+  resource_group_name = data.azurerm_resource_group.this.name
+  location            = data.azurerm_resource_group.this.location
+
+  storage_account_name       = azurerm_storage_account.this.name
+  storage_account_access_key = azurerm_storage_account.this.primary_access_key
+
+  runtime_name    = "python"
+  runtime_version = "3.11"
+
+  https_only = true
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  app_settings = {
+    FUNCTIONS_WORKER_RUNTIME = "python"
+    WEBSITE_RUN_FROM_PACKAGE = "1"
+
+    COSMOS_ENDPOINT = azurerm_cosmosdb_account.this.endpoint
+  }
+}
+
+
+resource "azurerm_cosmosdb_account" "this" {
+  name                = "cosmos-cloud-resume"
+  location            = data.azurerm_resource_group.this.location
+  resource_group_name = data.azurerm_resource_group.this.name
+
+  offer_type = "Standard"
+  kind       = "GlobalDocumentDB"
+
+  consistency_policy {
+    consistency_level = "Session"
+  }
+
+  capabilities {
+    name = "EnableServerless"
+  }
+
+  geo_location {
+    location          = data.azurerm_resource_group.this.location
+    failover_priority = 0
+  }
+}
+
+resource "azurerm_cosmosdb_sql_database" "this" {
+  name                = "resume"
+  resource_group_name = data.azurerm_resource_group.this.name
+  account_name        = azurerm_cosmosdb_account.this.name
+}
+
+resource "azurerm_cosmosdb_sql_container" "visits" {
+  name                = "visits"
+  resource_group_name = data.azurerm_resource_group.this.name
+  account_name        = azurerm_cosmosdb_account.this.name
+  database_name       = azurerm_cosmosdb_sql_database.this.name
+
+  partition_key_path = "/id"
+}
+
+resource "azurerm_cosmosdb_sql_container" "unique" {
+  name                = "uniqueVisitors"
+  resource_group_name = data.azurerm_resource_group.this.name
+  account_name        = azurerm_cosmosdb_account.this.name
+  database_name       = azurerm_cosmosdb_sql_database.this.name
+
+  partition_key_path = "/date"
+
+  default_ttl = 2592000 # 30 days (optional but recommended)
+}
+
+data "azurerm_cosmosdb_sql_role_definition" "data_contributor" {
+  resource_group_name = data.azurerm_resource_group.this.name
+  account_name        = azurerm_cosmosdb_account.this.name
+  role_definition_id  = "00000000-0000-0000-0000-000000000002"
+}
+resource "azurerm_cosmosdb_sql_role_assignment" "function" {
+  resource_group_name = data.azurerm_resource_group.this.name
+  account_name        = azurerm_cosmosdb_account.this.name
+
+  role_definition_id = data.azurerm_cosmosdb_sql_role_definition.data_contributor.id
+  principal_id       = azurerm_function_app_flex_consumption.this.identity[0].principal_id
+  scope              = azurerm_cosmosdb_account.this.id
+}
+
+
+resource "azurerm_cdn_frontdoor_origin_group" "api" {
+  name                     = "api-origin-group"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.this.id
+
+  load_balancing {
+    successful_samples_required = 1
+  }
+}
+
+resource "azurerm_cdn_frontdoor_origin" "api" {
+  name                          = "function-origin"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.api.id
+
+  host_name          = azurerm_function_app_flex_consumption.this.default_hostname
+  origin_host_header = azurerm_function_app_flex_consumption.this.default_hostname
+
+
+  https_port                     = 443
+  http_port                      = 80
+  certificate_name_check_enabled = true
+  enabled                        = true
+}
+
+resource "azurerm_cdn_frontdoor_route" "api" {
+  name                          = "api-route"
+  cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.this.id
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.api.id
+  cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.api.id]
+
+  patterns_to_match   = ["/api/*"]
+  supported_protocols = ["Https"]
+  forwarding_protocol = "HttpsOnly"
+
+  https_redirect_enabled = false
+
+  cdn_frontdoor_custom_domain_ids = [
+    azurerm_cdn_frontdoor_custom_domain.resume.id
+  ]
+}

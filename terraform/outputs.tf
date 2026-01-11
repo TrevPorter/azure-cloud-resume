@@ -18,4 +18,16 @@ output "frontdoor_url" {
   value       = "https://${azurerm_cdn_frontdoor_endpoint.this.host_name}"
 }
 
+output "frontdoor_endpoint" {
+  value = azurerm_cdn_frontdoor_endpoint.this.host_name
+}
+
+output "function_hostname" {
+  value = azurerm_linux_function_app.this.default_hostname
+}
+
+output "static_site_url" {
+  value = azurerm_storage_account.this.primary_web_endpoint
+}
+
 

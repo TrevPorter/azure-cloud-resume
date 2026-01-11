@@ -4,6 +4,7 @@ on:
   push:
     branches: [ "main" ]
 
+
 permissions:
   id-token: write
   contents: read
@@ -13,11 +14,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # ---------- CHECKOUT ----------
     - name: Checkout repo
       uses: actions/checkout@v4
 
-    # ---------- AZURE LOGIN (OIDC) ----------
     - name: Azure Login
       uses: azure/login@v1
       with:
@@ -26,20 +25,32 @@ jobs:
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     # ---------- TERRAFORM ----------
+
+    - name: Detect Terraform changes
+      id: changes
+      uses: dorny/paths-filter@v3
+      with:
+        filters: |
+          terraform:
+            - 'terraform/**'
+
     - name: Setup Terraform
+      if: steps.changes.outputs.terraform == 'true'
       uses: hashicorp/setup-terraform@v3
 
     - name: Terraform Init
+      if: steps.changes.outputs.terraform == 'true'
       working-directory: terraform
       run: terraform init
 
     - name: Terraform Apply
+      if: steps.changes.outputs.terraform == 'true'
       working-directory: terraform
-      run: |
-        terraform apply -auto-approve \
-          -var="storage_account_name=tfcloudresume" \
+      run: terraform apply -auto-approve \
+        -var="storage_account_name=tfcloudresume"
 
-    # ---------- SITE UPLOAD ----------
+
+    # ---------- SITE ----------
     - name: Upload site to Azure Storage
       run: |
         az storage blob upload-batch \
@@ -48,10 +59,8 @@ jobs:
           --source site \
           --overwrite
 
-    # ---------- FRONT DOOR CACHE PURGE ----------
-  #  - name: Purge Azure Front Door cache
- #     run: |
-  #      az afd endpoint purge \
-  #        --resource-group tp-cloud-resume \
-   #       --endpoint-name cloud-resume-endpoint \
-   #       --content-paths "/*"
+    # ---------- FUNCTIONS ----------
+    - name: Deploy Azure Functions
+      working-directory: api
+      run: |
+        func azure functionapp publish func-cloud-resume

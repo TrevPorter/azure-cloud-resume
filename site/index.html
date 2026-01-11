@@ -67,23 +67,23 @@
 
   <footer class="container footer">
     <p>
-  Visitors: <span id="visitor-count">Loading...</span>
+  Total Visits: <span id="visitor-count">Loading...</span><br>
+  Unique Visitors Today: <span id="unique-count">Loading...</span>
 </p>
     <p>© 2026 Trevor Porter • Built on Microsoft Azure</p>
   </footer>
   <script>
-async function getVisitorCount() {
-  try {
-    const response = await fetch("/api/GetVisitorCount");
-    const data = await response.json();
+async function loadCounts() {
+  const [hits, uniques] = await Promise.all([
+    fetch("/api/GetVisitorCount").then(r => r.json()),
+    fetch("/api/GetUniqueVisitorCount").then(r => r.json())
+  ]);
 
-    document.getElementById("visitor-count").innerText = data.count;
-  } catch (error) {
-    console.error("Error fetching visitor count:", error);
-  }
+  document.getElementById("visitor-count").innerText = hits.count;
+  document.getElementById("unique-count").innerText = uniques.uniqueVisitors;
 }
 
-getVisitorCount();
+loadCounts();
 </script>
 
 </body>

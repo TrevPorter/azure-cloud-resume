@@ -5,3 +5,4 @@
 terraform.tfvars
 .crash.log
 .terraform.lock.hcl
+site/api/local.settings.json

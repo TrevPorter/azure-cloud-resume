@@ -1,0 +1,10 @@
+{
+  "azureFunctions.deploySubpath": "site\\backend\\GetVisitorCount",
+  "azureFunctions.scmDoBuildDuringDeployment": true,
+  "azureFunctions.pythonVenv": "${workspaceFolder}/site/backend/.venv",
+  "azureFunctions.projectLanguage": "Python",
+  "azureFunctions.projectRuntime": "~4",
+  "debug.internalConsoleOptions": "neverOpen",
+  "azureFunctions.projectLanguageModel": 2,
+  "azureFunctions.projectSubpath": "site\\backend\\GetVisitorCount"
+}
