@@ -1,5 +1,0 @@
-az login --tenant f6162895-fe83-4f48-8b63-f5c223194b33
-
-az role assignment create --assignee a9d7ddec-206a-412c-8663-b1679894f140 --role Contributor --scope /subscriptions/f375afbd-e722-474f-9d5f-5f44a25ed424
-
-terraform import azurerm_resource_group.this /subscriptions/f375afbd-e722-474f-9d5f-5f44a25ed424/resourceGroups/tp-cloud-resume1
