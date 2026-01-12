@@ -66,4 +66,4 @@ jobs:
     - name: Deploy Azure Functions
       working-directory: site/backend
       run: |
-        func azure functionapp publish func-cloud-resume
+        func azure functionapp publish func-cloud-resume --python
