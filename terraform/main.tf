@@ -116,7 +116,7 @@ resource "azurerm_function_app_flex_consumption" "this" {
   site_config {}  # required
 
   app_settings = {
-    WEBSITE_RUN_FROM_PACKAGE = "1"
+    
     COSMOS_ENDPOINT          = azurerm_cosmosdb_account.this.endpoint
   }
 }
