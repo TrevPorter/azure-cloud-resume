@@ -23,8 +23,9 @@ output "frontdoor_endpoint" {
 }
 
 output "function_hostname" {
-  value = azurerm_linux_function_app.this.default_hostname
+  value = azurerm_function_app_flex_consumption.this.default_hostname
 }
+
 
 output "static_site_url" {
   value = azurerm_storage_account.this.primary_web_endpoint

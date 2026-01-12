@@ -86,29 +86,40 @@ resource "azurerm_cdn_frontdoor_custom_domain" "resume" {
   }
 }
 
+resource "azurerm_service_plan" "flex" {
+  name                = "asp-cloud-resume-flex"
+  resource_group_name = data.azurerm_resource_group.this.name
+  location            = data.azurerm_resource_group.this.location
+
+  os_type  = "Linux"
+  sku_name = "FC1" # REQUIRED for Flex Consumption
+}
 
 resource "azurerm_function_app_flex_consumption" "this" {
   name                = "func-cloud-resume"
   resource_group_name = data.azurerm_resource_group.this.name
   location            = data.azurerm_resource_group.this.location
 
-  storage_account_name       = azurerm_storage_account.this.name
-  storage_account_access_key = azurerm_storage_account.this.primary_access_key
-
+  # REQUIRED for Flex
   runtime_name    = "python"
   runtime_version = "3.11"
 
-  https_only = true
+  service_plan_id = azurerm_service_plan.flex.id
+
+  storage_container_type      = "blobContainer"
+  storage_container_endpoint  = azurerm_storage_account.this.primary_blob_endpoint
+  storage_authentication_type = "SystemAssignedIdentity"
 
   identity {
     type = "SystemAssigned"
   }
 
+  site_config {}  # REQUIRED, even if empty
+
   app_settings = {
     FUNCTIONS_WORKER_RUNTIME = "python"
     WEBSITE_RUN_FROM_PACKAGE = "1"
-
-    COSMOS_ENDPOINT = azurerm_cosmosdb_account.this.endpoint
+    COSMOS_ENDPOINT          = azurerm_cosmosdb_account.this.endpoint
   }
 }
 
@@ -147,8 +158,9 @@ resource "azurerm_cosmosdb_sql_container" "visits" {
   account_name        = azurerm_cosmosdb_account.this.name
   database_name       = azurerm_cosmosdb_sql_database.this.name
 
-  partition_key_path = "/id"
+  partition_key_paths = ["/id"]
 }
+
 
 resource "azurerm_cosmosdb_sql_container" "unique" {
   name                = "uniqueVisitors"
@@ -156,10 +168,10 @@ resource "azurerm_cosmosdb_sql_container" "unique" {
   account_name        = azurerm_cosmosdb_account.this.name
   database_name       = azurerm_cosmosdb_sql_database.this.name
 
-  partition_key_path = "/date"
-
-  default_ttl = 2592000 # 30 days (optional but recommended)
+  partition_key_paths = ["/date"]
+  default_ttl         = 2592000
 }
+
 
 data "azurerm_cosmosdb_sql_role_definition" "data_contributor" {
   resource_group_name = data.azurerm_resource_group.this.name

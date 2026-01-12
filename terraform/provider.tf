@@ -1,5 +1,10 @@
 terraform {
-  required_version = ">= 1.5"
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 3.96.0"
+    }
+  }
 
   backend "azurerm" {
     resource_group_name  = "rg-tf-state"
@@ -7,15 +12,11 @@ terraform {
     container_name       = "tfstate"
     key                  = "cloud-resume.tfstate"
   }
-
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.100"
-    }
-  }
 }
 
 provider "azurerm" {
   features {}
+
+  subscription_id = "f375afbd-e722-474f-9d5f-5f44a25ed424"
 }
+
