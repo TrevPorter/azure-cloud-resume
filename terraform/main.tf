@@ -105,7 +105,7 @@ resource "azurerm_function_app_flex_consumption" "this" {
 
   service_plan_id = azurerm_service_plan.flex.id
 
-  storage_container_type      = "BlobContainer"
+  storage_container_type      = "blobContainer"
   storage_container_endpoint  = azurerm_storage_account.this.primary_blob_endpoint
   storage_authentication_type = "SystemAssignedIdentity"
 
