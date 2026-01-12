@@ -144,12 +144,24 @@ resource "azurerm_cosmosdb_account" "this" {
     failover_priority = 0
   }
 }
+resource "time_sleep" "wait_for_cosmos" {
+  depends_on = [
+    azurerm_cosmosdb_account.this
+  ]
+
+  create_duration = "60s"
+}
 
 resource "azurerm_cosmosdb_sql_database" "this" {
   name                = "resume"
   resource_group_name = data.azurerm_resource_group.this.name
   account_name        = azurerm_cosmosdb_account.this.name
+
+  depends_on = [
+    time_sleep.wait_for_cosmos
+  ]
 }
+
 
 resource "azurerm_cosmosdb_sql_container" "visits" {
   name                = "visits"
@@ -158,6 +170,9 @@ resource "azurerm_cosmosdb_sql_container" "visits" {
   database_name       = azurerm_cosmosdb_sql_database.this.name
 
   partition_key_paths = ["/id"]
+  depends_on = [
+  azurerm_cosmosdb_sql_database.this
+ ]
 }
 
 
@@ -169,6 +184,9 @@ resource "azurerm_cosmosdb_sql_container" "unique" {
 
   partition_key_paths = ["/date"]
   default_ttl         = 2592000
+  depends_on = [
+  azurerm_cosmosdb_sql_database.this
+ ]
 }
 
 
