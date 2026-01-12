@@ -64,6 +64,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y azure-functions-core-tools-4
     - name: Deploy Azure Functions
-      working-directory: backend
+      working-directory: site/backend
       run: |
         func azure functionapp publish func-cloud-resume
