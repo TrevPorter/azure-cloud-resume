@@ -100,13 +100,12 @@ resource "azurerm_function_app_flex_consumption" "this" {
   resource_group_name = data.azurerm_resource_group.this.name
   location            = data.azurerm_resource_group.this.location
 
-  # REQUIRED for Flex
   runtime_name    = "python"
   runtime_version = "3.11"
 
   service_plan_id = azurerm_service_plan.flex.id
 
-  storage_container_type      = "blobContainer"
+  storage_container_type      = "BlobContainer"
   storage_container_endpoint  = azurerm_storage_account.this.primary_blob_endpoint
   storage_authentication_type = "SystemAssignedIdentity"
 
@@ -114,14 +113,14 @@ resource "azurerm_function_app_flex_consumption" "this" {
     type = "SystemAssigned"
   }
 
-  site_config {}  # REQUIRED, even if empty
+  site_config {}  # required
 
   app_settings = {
-    FUNCTIONS_WORKER_RUNTIME = "python"
     WEBSITE_RUN_FROM_PACKAGE = "1"
     COSMOS_ENDPOINT          = azurerm_cosmosdb_account.this.endpoint
   }
 }
+
 
 
 resource "azurerm_cosmosdb_account" "this" {
