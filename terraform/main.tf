@@ -106,7 +106,7 @@ resource "azurerm_function_app_flex_consumption" "this" {
   service_plan_id = azurerm_service_plan.flex.id
 
   storage_container_type      = "blobContainer"
-  storage_container_endpoint  = azurerm_storage_account.this.primary_blob_endpoint
+  storage_container_endpoint = azurerm_storage_container.function_code.id
   storage_authentication_type = "SystemAssignedIdentity"
 
   identity {
@@ -202,6 +202,11 @@ resource "azurerm_cosmosdb_sql_role_assignment" "function" {
   role_definition_id = data.azurerm_cosmosdb_sql_role_definition.data_contributor.id
   principal_id       = azurerm_function_app_flex_consumption.this.identity[0].principal_id
   scope              = azurerm_cosmosdb_account.this.id
+}
+resource "azurerm_storage_container" "function_code" {
+  name                  = "function-code"
+  storage_account_name  = azurerm_storage_account.this.name
+  container_access_type = "private"
 }
 
 resource "azurerm_role_assignment" "function_storage_blob" {
