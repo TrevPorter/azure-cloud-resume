@@ -59,7 +59,11 @@ jobs:
           --overwrite
 
     # ---------- FUNCTIONS ----------
+    - name: Install Azure Functions Core Tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y azure-functions-core-tools-4
     - name: Deploy Azure Functions
-      working-directory: api
+      working-directory: backend
       run: |
         func azure functionapp publish func-cloud-resume
