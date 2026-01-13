@@ -61,11 +61,13 @@ resource "azurerm_cdn_frontdoor_route" "this" {
   patterns_to_match   = ["/*"]
   supported_protocols = ["Https"]
   forwarding_protocol = "HttpsOnly"
-
   https_redirect_enabled = false
 
-  cdn_frontdoor_custom_domain_ids = []
+  cdn_frontdoor_custom_domain_ids = [
+    azurerm_cdn_frontdoor_custom_domain.resume.id
+  ]
 }
+
 
 
 
@@ -105,21 +107,26 @@ resource "azurerm_function_app_flex_consumption" "this" {
 
   service_plan_id = azurerm_service_plan.flex.id
 
-  storage_container_type      = "blobContainer"
-  storage_container_endpoint = azurerm_storage_container.function_code.id
+  # ✅ Correct values for Flex
+  storage_container_type = "blobContainer"
+  storage_container_endpoint = "https://${azurerm_storage_account.this.name}.blob.core.windows.net/${azurerm_storage_container.function_code.name}"
   storage_authentication_type = "SystemAssignedIdentity"
 
   identity {
     type = "SystemAssigned"
   }
 
-  site_config {}  # required
+  site_config {}
 
   app_settings = {
-    
-    COSMOS_ENDPOINT          = azurerm_cosmosdb_account.this.endpoint
+    COSMOS_ENDPOINT = azurerm_cosmosdb_account.this.endpoint
   }
+
+  depends_on = [
+    azurerm_storage_container.function_code
+  ]
 }
+
 
 
 
@@ -209,7 +216,13 @@ resource "azurerm_role_assignment" "function_storage_blob" {
   scope                = azurerm_storage_container.function_code.resource_manager_id
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_function_app_flex_consumption.this.identity[0].principal_id
-}
+
+  depends_on = [
+    azurerm_function_app_flex_consumption.this,
+    azurerm_storage_container.function_code
+   ]
+  }
+
 
 
 resource "azurerm_cdn_frontdoor_origin_group" "api" {
