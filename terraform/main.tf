@@ -189,27 +189,16 @@ resource "azurerm_cosmosdb_sql_container" "unique" {
  ]
 }
 
-resource "azurerm_role_assignment" "function_cosmos_data" {
-  scope              = azurerm_cosmosdb_account.this.id
-  role_definition_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/00000000-0000-0000-0000-000000000002"
-  principal_id       = azurerm_function_app_flex_consumption.this.identity[0].principal_id
-}
-data "azurerm_client_config" "current" {}
-
-
-data "azurerm_cosmosdb_sql_role_definition" "data_contributor" {
-  resource_group_name = data.azurerm_resource_group.this.name
-  account_name        = azurerm_cosmosdb_account.this.name
-  role_definition_id  = "00000000-0000-0000-0000-000000000002"
-}#
-resource "azurerm_cosmosdb_sql_role_assignment" "function" {
+resource "azurerm_cosmosdb_sql_role_assignment" "function_cosmos_data" {
   resource_group_name = data.azurerm_resource_group.this.name
   account_name        = azurerm_cosmosdb_account.this.name
 
-  role_definition_id = data.azurerm_cosmosdb_sql_role_definition.data_contributor.id
+  role_definition_id = "${azurerm_cosmosdb_account.this.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
   principal_id       = azurerm_function_app_flex_consumption.this.identity[0].principal_id
   scope              = azurerm_cosmosdb_account.this.id
 }
+
+
 resource "azurerm_storage_container" "function_code" {
   name                  = "function-code"
   storage_account_id    = azurerm_storage_account.this.id
