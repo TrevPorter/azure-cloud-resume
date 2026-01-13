@@ -4,6 +4,7 @@ import os
 import json
 import azure.functions as func
 
+
 app = func.FunctionApp()
 
 @app.function_name(name="GetVisitorCount")
