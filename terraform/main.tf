@@ -216,11 +216,6 @@ resource "azurerm_cosmosdb_sql_role_assignment" "function_cosmos_data" {
   scope              = azurerm_cosmosdb_account.this.id
 }
 
-resource "azurerm_role_assignment" "function_storage_blob" {
-  scope                = azurerm_storage_account.this.id
-  role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_function_app_flex_consumption.this.identity[0].principal_id
-}
 
 resource "azurerm_role_assignment" "function_storage_queue" {
   scope                = azurerm_storage_account.this.id
