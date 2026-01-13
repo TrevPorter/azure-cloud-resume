@@ -189,15 +189,12 @@ resource "azurerm_cosmosdb_sql_container" "unique" {
  ]
 }
 
-data "azurerm_role_definition" "cosmos_data_contributor" {
-  name  = "Cosmos DB Built-in Data Contributor"
-  scope = azurerm_cosmosdb_account.this.id
-}
 resource "azurerm_role_assignment" "function_cosmos_data" {
   scope              = azurerm_cosmosdb_account.this.id
-  role_definition_id = data.azurerm_role_definition.cosmos_data_contributor.id
+  role_definition_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/00000000-0000-0000-0000-000000000002"
   principal_id       = azurerm_function_app_flex_consumption.this.identity[0].principal_id
 }
+data "azurerm_client_config" "current" {}
 
 
 data "azurerm_cosmosdb_sql_role_definition" "data_contributor" {
