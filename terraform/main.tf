@@ -189,6 +189,11 @@ resource "azurerm_cosmosdb_sql_container" "unique" {
  ]
 }
 
+resource "azurerm_role_assignment" "function_cosmos_data" {
+  scope                = azurerm_cosmosdb_account.this.id
+  role_definition_name = "Cosmos DB Built-in Data Contributor"
+  principal_id         = azurerm_function_app_flex_consumption.this.identity[0].principal_id
+}
 
 data "azurerm_cosmosdb_sql_role_definition" "data_contributor" {
   resource_group_name = data.azurerm_resource_group.this.name
@@ -205,7 +210,7 @@ resource "azurerm_cosmosdb_sql_role_assignment" "function" {
 }
 resource "azurerm_storage_container" "function_code" {
   name                  = "function-code"
-  storage_account_name  = azurerm_storage_account.this.name
+  storage_account_id    = azurerm_storage_account.this.id
   container_access_type = "private"
 }
 
