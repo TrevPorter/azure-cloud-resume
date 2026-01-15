@@ -1,90 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trevor Porter | Automation Enthusiast</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trevor Porter | Automation Enthusiast</title>
 
-  <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/styles.css" />
 
-  <!-- SEO basics -->
-  <meta name="description" content="Azure DevOps portfolio and Cloud Resume Challenge project" />
-</head>
+    <!-- SEO basics -->
+    <meta
+      name="description"
+      content="Azure DevOps portfolio and Cloud Resume Challenge project"
+    />
+  </head>
 
-<body>
-  <header class="container">
-    <h1>Trevor Porter</h1>
-    <p class="subtitle">Automation Enthusiast</p>
+  <body>
+    <header class="container">
+      <h1>Trevor Porter</h1>
+      <p class="subtitle">Automation Enthusiast</p>
 
-    <div class="links">
-      <a href="mailto:your.email@example.com">Email</a>
-      <a href="https://github.com/yourusername" target="_blank">GitHub</a>
-      <a href="https://www.linkedin.com/in/yourprofile" target="_blank">LinkedIn</a>
-    </div>
-  </header>
-
-  <main class="container">
-    <section>
-      <h2>About</h2>
-      <p>
-        ICT Support Professional, Tech nerd, Home Lab tinkerer. Focused on automating infrastructure and delivery pipelines using Microsoft Azure, Terraform, and CI/CD.
-      </p>
-    </section>
-
-    <section>
-      <h2>Skills</h2>
-
-      <ul class="skills">
-        <li><strong>Cloud:</strong> Azure, Entra ID, Static Web Apps</li>
-        <li><strong>Infrastructure as Code:</strong> Terraform</li>
-        <li><strong>CI/CD:</strong> Azure DevOps Pipelines, GitHub Actions</li>
-        <li><strong>Automation:</strong> Ansible</li>
-        <li><strong>OS:</strong> Linux, Windows Server</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>Projects</h2>
-
-      <div class="project">
-        <h3>Azure Cloud Resume Challenge</h3>
-        <p>
-          Cloud-native resume website built on Azure using Static Web Apps,
-          serverless backend services, Infrastructure as Code, and CI/CD.
-        </p>
-        <ul>
-          <li>Azure Static Web Apps</li>
-          <li>Azure Functions (serverless API)</li>
-          <li>Azure Cosmos DB</li>
-          <li>Terraform provisioning</li>
-          <li>CI/CD automation</li>
-        </ul>
-        <p class="status">Status: In Progress</p>
+      <div class="links">
+        <a href="mailto:your.email@example.com">Email</a>
+        <a href="https://github.com/yourusername" target="_blank">GitHub</a>
+        <a href="https://www.linkedin.com/in/yourprofile" target="_blank"
+          >LinkedIn</a
+        >
       </div>
-    </section>
-  </main>
-  
+    </header>
 
-  <footer class="container footer">
-    <p>
-  Total Visits: <span id="visitor-count">Loading...</span><br>
-  Unique Visitors Today: <span id="unique-count">Loading...</span>
-</p>
-    <p>© 2026 Trevor Porter • Built on Microsoft Azure</p>
-  </footer>
-  <script>
-async function loadCounts() {
-  const [hits, uniques] = await Promise.all([
-    fetch("/api/GetVisitorCount").then(r => r.json()),
-    fetch("/api/GetUniqueVisitorCount").then(r => r.json())
-  ]);
+    <main class="container">
+      <section>
+        <h2>About</h2>
+        <p>
+          ICT Support Professional, Tech nerd, Home Lab tinkerer. Focused on
+          automating infrastructure and delivery pipelines using Microsoft
+          Azure, Terraform, and CI/CD.
+        </p>
+      </section>
 
-  document.getElementById("visitor-count").innerText = hits.count;
-  document.getElementById("unique-count").innerText = uniques.uniqueVisitors;
-}
+      <section>
+        <h2>Skills</h2>
 
-loadCounts();
-</script>
+        <ul class="skills">
+          <li><strong>Cloud:</strong> Azure, Entra ID, Static Web Apps</li>
+          <li><strong>Infrastructure as Code:</strong> Terraform</li>
+          <li>
+            <strong>CI/CD:</strong> Azure DevOps Pipelines, GitHub Actions
+          </li>
+          <li><strong>Automation:</strong> Ansible</li>
+          <li><strong>OS:</strong> Linux, Windows Server</li>
+        </ul>
+      </section>
 
-</body>
+      <section>
+        <h2>Projects</h2>
+
+        <div class="project">
+          <h3>Azure Cloud Resume Challenge</h3>
+          <p>
+            Cloud-native resume website built on Azure using Static Web Apps,
+            serverless backend services, Infrastructure as Code, and CI/CD.
+          </p>
+          <ul>
+            <li>Azure Static Web Apps</li>
+            <li>Azure Functions (serverless API)</li>
+            <li>Azure Cosmos DB</li>
+            <li>Terraform provisioning</li>
+            <li>CI/CD automation</li>
+          </ul>
+          <p class="status">Status: In Progress</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="container footer">
+      <p>
+        Total Visits: <span id="visitor-count">Loading...</span><br />
+        Unique Visitors Today: <span id="unique-count">Loading...</span>
+      </p>
+      <p>© 2026 Trevor Porter • Built on Microsoft Azure</p>
+    </footer>
+    <script>
+      (async function loadVisitorCount() {
+        try {
+          const response = await fetch("/api/GetVisitorCount");
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const data = await response.json();
+
+          document.getElementById("visitor-count").textContent =
+            data.count ?? "—";
+          document.getElementById("unique-count").textContent =
+            data.unique ?? "—";
+        } catch (err) {
+          console.error("Failed to load visitor count", err);
+          document.getElementById("visitor-count").textContent = "—";
+          document.getElementById("unique-count").textContent = "—";
+        }
+      })();
+    </script>
+  </body>
 </html>
