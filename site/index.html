@@ -100,7 +100,7 @@ async function loadCounts() {
   try {
     const [visits, unique] = await Promise.all([
       fetchJsonSafe("/api/GetVisitorCount"),
-      fetchJsonSafe("/api/GetUniqueVisitorCount")
+      fetchJsonSafe("/api/GetDailyUniqueCount")
     ]);
 
     const visitsEl = document.getElementById("visitor-count");
