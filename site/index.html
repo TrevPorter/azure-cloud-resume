@@ -81,21 +81,39 @@
       <p>© 2026 Trevor Porter • Built on Microsoft Azure</p>
     </footer>
     <script>
+async function fetchJsonSafe(url) {
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) {
+      console.warn(`Fetch failed for ${url}: ${res.status}`);
+      return { count: "N/A" };
+    }
+    const data = await res.json();
+    return (data && typeof data.count !== "undefined") ? data : { count: "N/A" };
+  } catch (e) {
+    console.error(`Error fetching ${url}:`, e);
+    return { count: "N/A" };
+  }
+}
+
 async function loadCounts() {
   try {
     const [visits, unique] = await Promise.all([
-      fetch("/api/GetVisitorCount").then(r => r.json()),
-      fetch("/api/GetUniqueVisitorCount").then(r => r.json())
+      fetchJsonSafe("/api/GetVisitorCount"),
+      fetchJsonSafe("/api/GetUniqueVisitorCount")
     ]);
 
-    document.getElementById("visitor-count").textContent = visits.count;
-    document.getElementById("unique-count").textContent = unique.count;
+    const visitsEl = document.getElementById("visitor-count");
+    const uniqueEl = document.getElementById("unique-count");
+
+    if (visitsEl) visitsEl.textContent = visits.count;
+    if (uniqueEl) uniqueEl.textContent = unique.count;
   } catch (e) {
     console.error(e);
   }
 }
 
-loadCounts();
+document.addEventListener("DOMContentLoaded", loadCounts);
 </script>
 
   </body>
